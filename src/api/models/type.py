@@ -8,4 +8,4 @@ class Type(db.Model):
         db.session.add(self)
         db.session.commit()
     def toJSON(self):
-        return {"id":self.id,"name":self.name}
+        return {"id":self.id,"key":self.name,"value":self.name}

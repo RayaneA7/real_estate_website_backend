@@ -6,13 +6,12 @@ from flask import jsonify, make_response
 from src.api import  db
 from bs4 import BeautifulSoup
 import requests
-
-from src.api.models import Annonce, Image, Type, ContactInfo
-
-
-def ScrapAnnonce():
-    db.drop_all()
-    db.create_all()
+from src.api.auth.auth import requires_auth
+from src.api.models import Annonce, Image, Type, ContactInfo, Message
+@requires_auth
+def ScrapAnnonce(user):
+    if(user.role=="1"):
+        return make_response(jsonify({"status": "failed", "data": None, "message": "not admin"}),401)
     try:
         response = requests.get("http://www.annonce-algerie.com/upload/flux/rss_1.xml", verify=False)
         items = BeautifulSoup(response.content, "xml").find_all("item")
@@ -107,3 +106,8 @@ def createAnnonceFromMap(map):
         type.add()
     annonce.type_id = type.id
     return annonce
+@requires_auth
+def get_website_stats(user):
+    if (user.role == "1"):
+        return make_response(jsonify({"status": "failed", "data": None, "message": "not admin"}), 401)
+    return make_response(jsonify({"data":{"annonces_count":len(Annonce.query.all()),"messages_count":len(Message.query.all())},"message":None,"status":"success",}),200)

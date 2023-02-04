@@ -1,9 +1,11 @@
 from flask import Blueprint, jsonify
+from apiflask import APIBlueprint
+
 from src.api.controllers.user_controller import getUsers
 from src.api.controllers.auth_controller import login,fill_data
 from src.api.auth.auth import requires_auth
 
-user_bp = Blueprint("user_bp",__name__)
+user_bp = APIBlueprint("user_bp",__name__)
 
 @user_bp.get('/')
 # @requires_auth()

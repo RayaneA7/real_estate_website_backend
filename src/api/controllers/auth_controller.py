@@ -29,6 +29,7 @@ def login():
         else:
             id = user.id
             token = jwt.encode({"userId":id},os.getenv("TOKEN_SECRET"))
+
             return make_response(jsonify({"status":"success","data":{"token":token,"isValid":True},"message":None}),200)
     else:
         return make_response(jsonify({"status":"failed","data":None,"message":"missing data in body"}),400)
@@ -41,6 +42,8 @@ def fill_data(user):
         contactInfo.phone_number = body["phoneNumber"]
         contactInfo.address = body["address"]
         contactInfo.add()
+        user.contact_info_id = contactInfo.id
+
         return make_response(jsonify({"status":"success","data":None,"message":None}),200)
     else:
         return make_response(jsonify({"status":"failed","data":None,"message":"missing data in body"}),400)

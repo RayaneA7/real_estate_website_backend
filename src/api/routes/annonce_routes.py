@@ -1,10 +1,12 @@
 
 from flask import Blueprint
+from apiflask import APIBlueprint
+
 from src.api.controllers.annonce_controller import AddAnnonce,DeleteAnnonce, getAllAnnonces, getAnnonceDetails, SearchForAnnonce,getTypes
 from src.api.auth.auth import requires_auth
 
 
-annonce_bp = Blueprint("annonce_bp", __name__)
+annonce_bp = APIBlueprint("annonce_bp", __name__)
 
 @annonce_bp.get('/')
 def get_annonces():
@@ -22,7 +24,7 @@ def get_Annonce_Details(annonceId):
 '''
 route pour ajouter une annonce
 '''
-@annonce_bp.route('/',methods=['POST'])
+@annonce_bp.post('/')
 @requires_auth
 def Add_Annonce(user):
     return AddAnnonce(user)

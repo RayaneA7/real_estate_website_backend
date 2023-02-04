@@ -88,7 +88,7 @@ def DeleteAnnonce(user,annonceId):
     if annonceId is not None:
         annonce = Annonce.query.filter(db.and_(Annonce.id == annonceId, Annonce.user_id == user.id)).first()
         if annonce == None:
-            return make_response(jsonify({"status": "failed", "data": None, "message": "invalid request"}),400)
+            return make_response(jsonify({"status": "failed", "data": None, "message": "invalid annonce"}),404)
         for message in annonce.messages:
             message.delete()
         annonce.delete()
