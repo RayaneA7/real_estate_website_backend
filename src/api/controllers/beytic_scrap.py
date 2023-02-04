@@ -147,8 +147,7 @@ def scrap_page(page_url):
 def scrap_beytic_website(nb_pages_to_scrap):
     """ @param nb_pages_to_scrap: number of pages to scrap
     """
-    db.drop_all()
-    db.create_all()
+
 
     if nb_pages_to_scrap <= 0 or nb_pages_to_scrap>30 :return
 

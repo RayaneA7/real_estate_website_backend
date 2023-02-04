@@ -27,3 +27,5 @@ soupsieve==2.3.2.post1
 SQLAlchemy==1.4.44
 urllib3==1.26.13
 Werkzeug==2.2.2
+APIFlask==1.2.1
+pytest==7.2.1
