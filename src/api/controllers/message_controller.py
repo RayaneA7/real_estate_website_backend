@@ -24,7 +24,7 @@ def viewMessage(user):
     message = Message.query.filter_by(id = int(messageId)).first()
     if message is None:
         return make_response(jsonify({"status": "failed", "data": None, "message": "message does not exist"}),400)
-    message.seen="0"
+    message.seen="1"
     message.add()
     return make_response(jsonify({"status":"success","data":None,"message":None}),200)
 
@@ -41,6 +41,7 @@ def sendMessage(user):
         message.annonce_id = body["annonceId"]
         message.sender_id = user.id
         message.add()
+        
         return make_response(jsonify({"status": "success", "data": None, "message": "message sent successfully"}),200)
 
     else:

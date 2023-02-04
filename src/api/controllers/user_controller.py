@@ -10,6 +10,7 @@ def getUsers():
 
 def getAnnoncesByUser(user):
     annonces = user.annonces
+
     items = map(lambda annonce: annonce.toJson(), annonces)
     return make_response(jsonify(
         {"status": "success", "data": list(items), "message": None}), 200)

@@ -7,11 +7,12 @@ from src.api import  db
 from bs4 import BeautifulSoup
 import requests
 
-from src.api.models import Annonce, Image, Type
+from src.api.models import Annonce, Image, Type, ContactInfo
 
 
 def ScrapAnnonce():
-
+    db.drop_all()
+    db.create_all()
     try:
         response = requests.get("http://www.annonce-algerie.com/upload/flux/rss_1.xml", verify=False)
         items = BeautifulSoup(response.content, "xml").find_all("item")
@@ -19,6 +20,24 @@ def ScrapAnnonce():
             response = requests.get(item.find("link").get_text(), verify=False)
             table = BeautifulSoup(response.content, "html.parser").find_all('table', class_="da_rub_cadre")[1].find_all(
                 'tr')
+            phoneNumberInfo = BeautifulSoup(response.content, "html.parser").find_all('table', class_="da_contact")[
+                0].find_all("span", class_="da_contact_value")
+            phoneNumber = None
+            if len(phoneNumberInfo) != 0:
+                phoneNumber = phoneNumberInfo[0].get_text().replace(" ", "").replace("+", "").replace("213",
+                                                                                                      "").replace("+33",
+                                                                                                                  "0")
+            addressInfo = BeautifulSoup(response.content, "html.parser").find_all('table', class_="da_contact")[
+                0].find_all("span", class_="da_contact_adr_soc")
+            ownerAddress = None
+            if len(addressInfo):
+                ownerAddress = addressInfo[0].get_text()
+            nameInfo = BeautifulSoup(response.content, "html.parser").find_all('table', class_="da_contact")[
+                0].find_all("span", class_="da_contact_rais_soc")
+            name = None
+            if len(nameInfo):
+                name = nameInfo[0].get_text()
+
             data = []
             images = BeautifulSoup(response.content, "html.parser").find_all('table', class_="da_rub_cadre")[
                 3].find_all(
@@ -50,7 +69,7 @@ def ScrapAnnonce():
             date = data[6 + i]
             annonce = createAnnonceFromMap(
                 {"type": type.lower(), "wilaya": wilaya, "commune": commune, "surface": surface, "price": price,
-                 "description": description, "category": category, "address": address, "date": date})
+                 "description": description, "category": category, "address": address, "date": date,"phoneNumber":phoneNumber,"name":name,"ownerAddress":ownerAddress})
             annonce.add()
             for imageInfo in images:
                 image = Image()
@@ -64,6 +83,11 @@ def ScrapAnnonce():
 
 def createAnnonceFromMap(map):
     annonce = Annonce()
+    contactInfo = ContactInfo()
+    contactInfo.address = map["ownerAddress"]
+    contactInfo.phone_number = map["phoneNumber"]
+    contactInfo.full_name = map["name"]
+    contactInfo.add()
     annonce.id = str(uuid.uuid1())
     annonce.price = map["price"]
     annonce.surface = map["surface"]
@@ -75,6 +99,7 @@ def createAnnonceFromMap(map):
     dates = map["date"].split("/")
     annonce.date = datetime.date(int(dates[2]), int(dates[1]), int(dates[0]) )
     annonce.user_id = None
+    annonce.contact_info_id = contactInfo.id
     type = Type.query.filter_by(name=map["type"]).first()
     if type == None:
         type = Type()

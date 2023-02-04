@@ -12,19 +12,19 @@ def requires_auth(f):
         if 'Authorization' not in request.headers:
             return jsonify({"success": "failed", "message": 'missing token'})
         token = request.headers['Authorization'].split(" ")[1]
-        try:
-            payload = jwt.decode(token,
-                                 os.getenv("TOKEN_SECRET"), algorithms='HS256')
-            print(payload)
-            user = User.query.filter_by(id=payload["userId"]).first()
-            if user is None:
-                return make_response(jsonify({"success": "failed", "message": 'Invalid user'}),401)
-            if f"/{user.id}/" != request.endpoint:
-                if user.address is None or user.phone_number is None:
-                    return make_response(jsonify({"status": "failed", "data": {"token": token, "isValid": False},
-                                                  "message": "missing phone and address"}, 401))
-            return f(user)
-        except:
-            return make_response(jsonify({"success": "failed", "message": 'Invalid token'}), 401)
+
+        payload = jwt.decode(token,
+                             os.getenv("TOKEN_SECRET"), algorithms='HS256')
+        print(payload)
+        user = User.query.filter_by(id=payload["userId"]).first()
+
+        if user is None:
+            return make_response(jsonify({"success": "failed", "message": 'Invalid user'}),401)
+        # if f"/http://192.168.145.12:5000/users/{user.id}/" != request.url.__str__():
+        #     if user.info.address is None or user.info.phone_number is None:
+        #         return make_response(jsonify({"status": "failed", "data": {"token": token, "isValid": False},
+        #                                       "message": "missing phone and address"}), 401)
+        return f(user,*args,**kwargs)
+
 
     return wrapper
