@@ -21,7 +21,7 @@ def get_unseen_messages_count(user):
 @requires_auth
 def view_message(user):
     return viewMessage(user)
-@message_bp.post('/ok')
+@message_bp.post('/')
 @requires_auth
 def send_message(user):
     return sendMessage(user)

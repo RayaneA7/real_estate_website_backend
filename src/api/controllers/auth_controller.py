@@ -7,7 +7,6 @@ from src.api.models import User, ContactInfo
 
 
 def login():
-
     body = request.get_json()
     if "email" in body and "image" in body and "name" in body:
         user = User.query.filter_by(email=body["email"]).first()
@@ -20,18 +19,20 @@ def login():
             contactInfo.email = body["email"]
             contactInfo.full_name = body["name"]
             contactInfo.add()
+            if body["email"] in ["km_benbetka@esi.dz", "kb_sefsaf@esi.dz", "ja_anane@esi.dz", "ka_kebir@esi.dz"]:
+                user.role = "0"
             id = str(uuid.uuid1())
             user.id = id
             user.contact_info_id = contactInfo.id
             user.add()
             token = jwt.encode({"userId":id},os.getenv("TOKEN_SECRET"))
             return make_response(
-                jsonify({"status": "success", "data": {"token": token, "isValid": False}, "message": None}), 200)
+                jsonify({"status": "success", "data": {"token": token, "isValid": False,"isAdmin":user.role=="0"}, "message": None}), 200)
         else:
             id = user.id
             token = jwt.encode({"userId":id},os.getenv("TOKEN_SECRET"))
 
-            return make_response(jsonify({"status":"success","data":{"token":token,"isValid":True},"message":None}),200)
+            return make_response(jsonify({"status":"success","data":{"token":token,"isValid":True,"isAdmin":user.role=="0"},"message":None}),200)
     else:
         return make_response(jsonify({"status":"failed","data":None,"message":"missing data in body"}),400)
 

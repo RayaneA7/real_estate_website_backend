@@ -41,7 +41,6 @@ def AddAnnonce(user):
         annonce.category = body["category"]
         annonce.latitude = body["coordinates"]["lat"]
         annonce.longitude = body["coordinates"]["lng"]
-        annonce.address = body["address"]
         annonce.date = datetime.datetime.now()
         annonce.contact_info_id = user.contact_info_id
         annonce.id = str(uuid.uuid1())
@@ -56,7 +55,8 @@ def AddAnnonce(user):
         return make_response(jsonify({"status": "done", "data": annonce.toJson(), "message": None}),200)
     else:
         return make_response(jsonify({"status": "failed", "data": None, "message": "missing informations"}),400)
-    
+
+
 def SearchForAnnonce():
     page = request.args.get("page", 1, int)
     minDate = request.args.get("min_date", datetime.date.min)

@@ -13,7 +13,7 @@ class Message(db.Model):
     annonce_id = db.Column(db.String(36), db.ForeignKey("annonces.id"))
     created_at = db.Column(db.DateTime,default=datetime.datetime.utcnow)
     def toJson(self):
-        return {"id" : self.id,"message":self.content,"vue":False if self.seen=="0" else True,"date":self.created_at,"name":User.query.filter_by(id=self.sender_id).first().full_name,"photo":User.query.filter_by(id=self.sender_id).first().picture_link}
+        return {"id" : self.id,"message":self.content,"vue":False if self.seen=="1" else True,"date":self.created_at,"name":User.query.filter_by(id=self.sender_id).first().full_name,"photo":User.query.filter_by(id=self.sender_id).first().picture_link}
     def add(self):
         db.session.add(self)
         db.session.commit()

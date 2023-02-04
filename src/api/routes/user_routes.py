@@ -23,5 +23,5 @@ def Fill_Data(user):
 @user_bp.route('/<userId>',methods=["GET"])
 @requires_auth
 def isValid(user,userId):
-    return jsonify({"status":"success","data":{"isValid":user.info.address is not None}})
+    return jsonify({"status":"success","data":{"isValid":user.info.address is not None,"isAdmin":user.role=="0"}})
 
