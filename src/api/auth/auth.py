@@ -27,7 +27,6 @@ def requires_auth(f):
             #                                       "message": "missing phone and address"}), 401)
             return f(user,*args,**kwargs)
         except:
-            print("problem")
             return make_response(jsonify({"success": "failed", "message": 'invalid token'}),401)
 
 

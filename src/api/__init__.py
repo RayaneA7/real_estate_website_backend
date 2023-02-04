@@ -45,9 +45,3 @@ def create_app():
     return app
 
 
-@app.route('/')
-def delete_bdd():
-    db.drop_all()
-    db.create_all()
-    print("hi")
-    return "hi"
