@@ -9,7 +9,7 @@ class User(db.Model):
     annonces = db.relationship("Annonce", backref="owner", lazy="dynamic")
     role = db.Column(db.String(1),default="1")
     def toJson(self):
-        return {"id" : self.id,"full_name":self.full_name,"email":self.email,"phone_number":self.info.phone_number,"annonces":list(map(lambda annonce:annonce.toJson(),self.annonces))}
+        return {"id" : self.id,"full_name":self.full_name,"email":self.email,"phone_number":self.info.phone_number,"address":self.info.address,"picture_link":self.picture_link,"annonces":list(map(lambda annonce:annonce.toJson(),self.annonces))}
     def add(self):
         db.session.add(self)
         db.session.commit()

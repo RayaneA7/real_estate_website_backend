@@ -8,7 +8,7 @@ from src.api.auth.auth import requires_auth
 
 annonce_bp = APIBlueprint("annonce_bp", __name__)
 
-@annonce_bp.get('/ok')
+@annonce_bp.get('/')
 def get_annonces():
     return getAllAnnonces()
 

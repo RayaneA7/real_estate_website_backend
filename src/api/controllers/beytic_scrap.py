@@ -2,9 +2,21 @@ from bs4 import BeautifulSoup
 import requests
 import json 
 
+import uuid
+import datetime
+
+from flask import jsonify, make_response
+
+from src.api import  db
+
+
+from src.api.models import Annonce, Image, Type, ContactInfo
+
+
 
 URL = "https://www.beytic.com/annonces-immobilieres/"
 
+strToInt={"Milliards":1000000000,"Millions":1000000}
 
 
 
@@ -36,17 +48,16 @@ def scrap_page(page_url):
     """ @param page_url: url of -all announces- page it contains (cards)
         @return: an array of json objects each object contain the announce details 
     """
-    res=[]
-    for announce_page_url in getAnnouncesLinks(page_url):
+    announces_links = getAnnouncesLinks(page_url)
+    for announce_page_url in announces_links:
         try:
             response = requests.get(announce_page_url)
+
             soup = BeautifulSoup(response.text,"lxml").find("div",class_="property")
-            
+
             images= [ "https://www.beytic.com/"+img["src"] for img in soup.select("div.slider__img > img")]
             # print("Images :" , *images , sep="\n")
             
-            price = soup.find("strong",class_="property__price-value").text.strip()
-            # print("Price :",price,sep="\n")
 
             description = soup.find("div",class_="property__description").select_one("p").text
             # print("Description",description,sep="\n")
@@ -56,6 +67,23 @@ def scrap_page(page_url):
 
             surface = soup.find("dd",class_="property__plan-value").text.replace("M²","").strip()
             # print("surface :",surface)
+
+            priceStr = soup.find("strong",class_="property__price-value").text.strip()
+            
+            # print(priceStr)
+            price = 0
+            if priceStr == "Prix sur demande":
+                price = 0
+            elif "/M²"  in priceStr :
+                priceStr.replace("/M²","")
+                priceStr = priceStr.split()
+                price = float(priceStr[0])*strToInt[priceStr[1]]*int(surface)
+            else:
+                priceStr = priceStr.split()
+                price = float(priceStr[0])*strToInt[priceStr[1]]
+            
+            # print("Price :",price,sep="\n")
+
 
             property_info_soup = soup.find("div",class_="property__info")
 
@@ -78,8 +106,7 @@ def scrap_page(page_url):
 
             # print("name",name,"phone",phone_number,sep="\n")
 
-            res+=[
-            {
+            res={
                 "wilaya":wilaya,
                 "commune":commune,
                 "address":adresse,
@@ -97,35 +124,76 @@ def scrap_page(page_url):
                     "phoneNumber":phone_number,
                 },
                 "coordinates":None
-            }]
+            }
+
+            annonce = createAnnonceFromMap(res)
+            annonce.add()
+            print("added")
+
+            for imageLink in images:
+                image = Image()
+                image.annonce_id = annonce.id
+                image.link = imageLink
+                image.add()
+
             print("added succefully")
         except Exception as e: 
-            print(e)
-    return res
+            print("exception 133",e)
+            
+    
         
 
 
 def scrap_beytic_website(nb_pages_to_scrap):
     """ @param nb_pages_to_scrap: number of pages to scrap
     """
-    print("hi")
+
+
     if nb_pages_to_scrap <= 0 or nb_pages_to_scrap>30 :return
-    res=[]
-    for page_count in range(1,nb_pages_to_scrap+1):
-        page = getPageLink(URL,page_count)
-        res+= scrap_page(page)
-        print(f"page {page_count} finished scrapping")
 
-    print(f"{len(res)} announces has been add succesfully")
+    try:
+        for page_count in range(1,nb_pages_to_scrap+1):
+            page = getPageLink(URL,page_count)
+            scrap_page(page)
+            print(f"page {page_count} finished scrapping")
+
+        return make_response(jsonify({"status":"success","data":None,"message":None}),200)
+
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({"status": "failed", "data": None, "message": "problem while scrapping"}),501)
 
 
-
-    with open('./src/api/beytic_scrap_result.json', 'w+') as fp:
-        json.dump(res, fp)
     
-        
 
 
 
-scrap_beytic_website(16)
+def createAnnonceFromMap(map):
+    annonce = Annonce()
+    contactInfo = ContactInfo()
+    contactInfo.address = map["contatcatInfo"]["email"]
+    contactInfo.phone_number = map["contatcatInfo"]["phoneNumber"]
+    contactInfo.full_name = map["contatcatInfo"]["name"]
+    contactInfo.add()
+    annonce.id = str(uuid.uuid1())
+    annonce.price = map["prix"]
+    annonce.surface = map["surface"]
+    annonce.wilaya = map["wilaya"]
+    annonce.commune = map["commune"]
+    annonce.category = map["typeAnnonce"]
+    annonce.description = map["description"]
+    annonce.address = map["address"]
+    dates = map["date"].split("-")
+    annonce.date = datetime.date(int(dates[2]), int(dates[1]), int(dates[0]) )
+    annonce.user_id = None
+    annonce.contact_info_id = contactInfo.id
+    type = Type.query.filter_by(name=map["typeImmoblier"]).first()
+    if type == None:
+        type = Type()
+        type.name = map["typeImmoblier"]
+        type.add()
+    annonce.type_id = type.id
+    return annonce
+
+
 
