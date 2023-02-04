@@ -8,7 +8,7 @@ message_bp = APIBlueprint("message_bp",__name__)
 
 
 #this route is for getting all the messages
-@message_bp.get('/')
+@message_bp.get('/messages')
 @requires_auth
 def get_all_messages(user):
     return getAllMessages(user)
@@ -21,7 +21,7 @@ def get_unseen_messages_count(user):
 @requires_auth
 def view_message(user):
     return viewMessage(user)
-@message_bp.post('/')
+@message_bp.post('/ok')
 @requires_auth
 def send_message(user):
     return sendMessage(user)

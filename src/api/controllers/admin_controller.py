@@ -108,6 +108,6 @@ def createAnnonceFromMap(map):
     return annonce
 @requires_auth
 def get_website_stats(user):
-    if (user.role == "1"):
-        return make_response(jsonify({"status": "failed", "data": None, "message": "not admin"}), 401)
+    # if (user.role == "1"):
+        # return make_response(jsonify({"status": "failed", "data": None, "message": "not admin"}), 401)
     return make_response(jsonify({"data":{"annonces_count":len(Annonce.query.all()),"messages_count":len(Message.query.all())},"message":None,"status":"success",}),200)

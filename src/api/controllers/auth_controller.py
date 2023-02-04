@@ -7,6 +7,7 @@ from src.api.models import User, ContactInfo
 
 
 def login():
+
     body = request.get_json()
     if "email" in body and "image" in body and "name" in body:
         user = User.query.filter_by(email=body["email"]).first()

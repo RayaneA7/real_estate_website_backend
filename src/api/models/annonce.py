@@ -31,7 +31,7 @@ class Annonce(db.Model):
     def toJson(self):
         return {"id" : self.id,"typeAnnonce":self.category,"surface":self.surface,"description":self.description,"prix":self.price
                        ,"wilaya":self.wilaya,"commune":self.commune,"address":self.address,"typeImmoblier":Type.query.filter_by(id=self.type_id).first().name,"coordinates":{"latitude":self.latitude,"longitude":self.longitude},
-                "images":list(map(lambda image:image.link,self.images)),"date":self.date,"contactInfo":self.contactInfo.toJson(),"userId":self.user_id
+                "images":list(map(lambda image:image.link,self.images)),"date":self.date,"userId":self.user_id,"ownerImage":(self.owner.picture_link if self.owner else  None) ,"contactInfo":self.contactInfo.toJson()
         }
     def add(self):
         db.session.add(self)

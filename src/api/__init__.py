@@ -15,7 +15,7 @@ app = APIFlask(__name__, docs_ui='swagger-ui',docs_path='/docs')
 
 CORS(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] =os.getenv("DATABASE_URI")#database_path
+app.config["SQLALCHEMY_DATABASE_URI"] =database_path
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "dsqhjvfqsjnchbrehvfdsfsd"
 db = SQLAlchemy(app)
@@ -45,3 +45,9 @@ def create_app():
     return app
 
 
+@app.route('/')
+def delete_bdd():
+    db.drop_all()
+    db.create_all()
+    print("hi")
+    return "hi"
